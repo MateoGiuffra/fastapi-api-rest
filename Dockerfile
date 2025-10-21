@@ -31,7 +31,7 @@ WORKDIR /app
 
 # Copy the installed dependencies from the builder stage
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/local/bin/uvicorn /usr/local/bin/uvicorn
+COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 
 # Copy the application source code
 COPY ./src ./src

@@ -1,8 +1,6 @@
 from fastapi import Request, status, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-
-from src.utils.fast_api_args import get_json
 from src.schemas.error import ErrorDTO
 
 class HandlerException:
@@ -10,7 +8,7 @@ class HandlerException:
     Class that returns a JSON response standardized with the error details in every method.
     """
     
-    async def validation_exception_handler(self, request: Request, exc: RequestValidationError):
+    async def validation_exception_handler(self, _request: Request, exc: RequestValidationError):
         """
         Validations errors Pydantic manager.
         """ 
@@ -21,7 +19,7 @@ class HandlerException:
             content=ErrorDTO(status_code=status_code, message=errors[0]['msg'], detail=[error["msg"] for error in errors]).model_dump(),
         )
     
-    async def http_fast_api_exception(self, request: Request, exc: HTTPException):
+    async def http_fast_api_exception(self, _request: Request, exc: HTTPException):
         """
         Http fast api exceptions manager.
         """
@@ -40,5 +38,3 @@ class HandlerException:
     #         content=ErrorDTO(status_code=exc.status_code, message=exc.message).model_dump(),
     #     )
 
-handler_instance = HandlerException()
-exception_handlers = get_json(handler_instance)

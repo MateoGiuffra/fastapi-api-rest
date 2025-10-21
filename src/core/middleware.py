@@ -1,11 +1,10 @@
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from jose import JWTError
-from src.schemas.error import ErrorDTO
 from src.services.cookie_service import CookieService
-
-PUBLIC_ENDPOINTS = ["/", "/docs", "/openapi.json"]
+from src.core.config import PUBLIC_ENDPOINTS
+from fastapi.responses import JSONResponse
+from src.schemas.error import ErrorDTO
+from fastapi import Request
+from jose import JWTError
 
 class Middleware(BaseHTTPMiddleware):
     def __init__(self, app, dispatch = None):
@@ -13,23 +12,10 @@ class Middleware(BaseHTTPMiddleware):
         self.cookie_service = CookieService()
     
     async def dispatch(self, request: Request, call_next: callable):
-        if request.url.path in PUBLIC_ENDPOINTS or request.url.path.startswith("/auth"):
+        if request.url.path in PUBLIC_ENDPOINTS:
             return await call_next(request)
-
-
-        errorDTO = ErrorDTO(
-            status_code=401,
-            message="Unauthorized: No token provided",
-            detail=[]
-        ).model_dump()
         
         token = self.cookie_service.get_token(request)
-
-        if not token:
-            return JSONResponse(
-                status_code=401,
-                content=errorDTO
-            )
 
         try:
             self.cookie_service.validate_token(token)
@@ -38,7 +24,11 @@ class Middleware(BaseHTTPMiddleware):
         except JWTError:
             return JSONResponse(
                 status_code=401,
-                content=errorDTO
+                content=ErrorDTO(
+                        status_code=401,
+                        message="Unauthorized: No token provided",
+                        detail=[]
+                    ).model_dump()
             )
         except Exception as e:
             print("Exception middleware: ", e, "type: ", type(e))

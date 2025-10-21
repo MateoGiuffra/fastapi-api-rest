@@ -1,9 +1,8 @@
-from fastapi import Response
-from jose import jwt
-from src.database.models.user import User
 from datetime import datetime, timedelta, timezone 
+from src.database.models.user import User
 from src.core.config import settings
-
+from jose import jwt, JWTError
+from fastapi import Response
 
 class CookieService:
     def __init__(self):
@@ -58,6 +57,8 @@ class CookieService:
         return request.cookies.get(self.key)
     
     def validate_token(self, token: str):
+        if token is None or token.strip() == "":
+            raise JWTError("Token is None")
         jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
        

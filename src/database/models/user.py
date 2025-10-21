@@ -2,7 +2,6 @@ from src.database.base import Base
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
-
 class User(Base):
     __tablename__ = "user"
     

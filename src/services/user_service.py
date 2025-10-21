@@ -1,10 +1,10 @@
 from src.database.models.user import User
-import bcrypt
 from src.repositories.user_repository import UserRepository
 from src.schemas.user import RegisterUserDTO, LoginUserDTO
 from fastapi import HTTPException, status, Response, Request
 from src.services.cookie_service import CookieService
 from src.schemas.pagination import PaginationParams, PaginationResponse
+import bcrypt
 
 class UserService:
     def __init__(self, user_repository:UserRepository, cookie_service: CookieService):

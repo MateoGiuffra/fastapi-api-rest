@@ -1,11 +1,11 @@
 def test_register_new_user_successfully(client):
     """
-    Test de integración: Prueba que el endpoint /users/register
+    Test de integración: Prueba que el endpoint /auth/register
     registra un nuevo usuario correctamente.
     """
     # Hacemos una petición POST al endpoint de registro
     response = client.post(
-        "/users/register",
+        "/auth/register",  # <-- Ruta corregida
         json={"username": "testuser", "password": "password123"}
     )
     data = response.json()
@@ -24,16 +24,15 @@ def test_register_existing_user_returns_conflict(client):
     """
     # 1. Creamos un usuario primero
     client.post(
-        "/users/register",
+        "/auth/register", 
         json={"username": "existinguser", "password": "password123"}
     )
-
-    # 2. Intentamos crearlo de nuevo
+    # 2. Intentamos registrar el mismo usuario nuevamente
     response = client.post(
-        "/users/register",
+        "/auth/register", 
         json={"username": "existinguser", "password": "anotherpassword"}
     )
 
     # Verificamos que la API responde con un error de conflicto
     assert response.status_code == 409 # 409 Conflict
-    assert response.json() == {"detail": "Username already exists"}
+    assert response.json()["message"] == "Username already exists"

@@ -1,7 +1,7 @@
 from fastapi import Response
 from jose import jwt
 from src.database.models.user import User
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone 
 from src.core.config import settings
 
 
@@ -30,7 +30,7 @@ class CookieService:
     
     def create_token(self, user: User) -> str:
         encode = {"sub": user.username, "id": user.id}
-        expires = datetime.utcnow() + timedelta(minutes=self.expiration_time)
+        expires = datetime.now(timezone.utc) + timedelta(minutes=self.expiration_time)
         encode.update({"exp": expires})
         return jwt.encode(
             encode,

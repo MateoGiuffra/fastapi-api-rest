@@ -2,52 +2,43 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-# Importa el modelo User para que SQLAlchemy lo reconozca y pueda crear la tabla
 from src.database.models.user import User
-
 from src.main import app
 from src.database.base import Base
-from src.dependencies.repositories_di import get_db_session
+from src.database.session import get_db_session as app_get_db_session
 
 # --- Configuración de la Base de Datos de Prueba ---
-# Usaremos SQLite en memoria para los tests. Es rápido y se aísla de tu DB de desarrollo.
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+SQLALCHEMY_DATABASE_URL = "sqlite+pysqlite:///:memory:"
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False} # Requerido para SQLite
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,  # Usar la misma conexión en memoria para todos los tests
 )
 
-# Creamos una sesión de base de datos de prueba
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# --- Fixture para la Base de Datos ---
-@pytest.fixture()
-def db_session():
-    # Crea todas las tablas en la base de datos en memoria
+@pytest.fixture(scope="session", autouse=True)
+def setup_db():
     Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-        # Elimina todas las tablas después de que el test termine
-        Base.metadata.drop_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
-# --- Fixture para el Cliente de API ---
-@pytest.fixture()
-def client(db_session):
-    # Sobrescribimos la dependencia `get_db_session` para que use la sesión de prueba
+@pytest.fixture(scope="function")
+def client():
     def override_get_db():
+        db = TestingSessionLocal()
         try:
-            yield db_session
+            yield db
         finally:
-            db_session.close()
+            db.close()
 
-    app.dependency_overrides[get_db_session] = override_get_db
-    
-    yield TestClient(app)
+    # Sobrescribe exactamente la misma dependencia usada por la app
+    app.dependency_overrides[app_get_db_session] = override_get_db
 
-    # Limpiamos la sobrescritura después del test
+    with TestClient(app) as test_client:
+        yield test_client
+
     app.dependency_overrides.clear()

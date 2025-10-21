@@ -19,7 +19,7 @@ RUN pip install poetry
 COPY pyproject.toml poetry.lock ./
 
 # Install dependencies, excluding development ones
-RUN poetry install --no-root --no-dev
+RUN poetry install --no-root --without dev
 
 # --- 2. Final Stage: Create the production image ---
 FROM python:3.12-slim as final

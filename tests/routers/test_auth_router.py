@@ -1,10 +1,7 @@
 from tests.routers.users_constants import *
 
 def test_register_new_user_successfully(client):
-    """
-    Test de integración: Prueba que el endpoint /auth/register
-    registra un nuevo usuario correctamente.
-    """
+    """Integration test: Tests that the /auth/register endpoint registers a new user successfully."""
     response = client.post(
         "/auth/register",  
         json=valid_user
@@ -18,10 +15,7 @@ def test_register_new_user_successfully(client):
 
 
 def test_register_existing_user_returns_conflict(client):
-    """
-    Test de integración: Prueba que el endpoint devuelve un error 409 Conflict
-    si se intenta registrar un usuario que ya existe.
-    """
+    """Integration test: Tests that the endpoint returns a 409 Conflict error if trying to register an existing user."""
     client.post(
         "/auth/register", 
         json=valid_user
@@ -37,7 +31,7 @@ def test_register_existing_user_returns_conflict(client):
     
 
 def test_login_without_register_first(client):
-    # no hay register previo
+    """Tests that logging in without a prior registration returns a 404 Not Found error."""
     response = client.post(
         "/auth/login",
         json=invalid_user
@@ -48,6 +42,7 @@ def test_login_without_register_first(client):
     assert data["message"] == "User not found"
     
 def test_login_with_wrong_password(client):
+    """Tests that attempting to log in with an incorrect password returns a 401 Unauthorized error."""
     client.post(
         "/auth/register", 
         json=valid_user
@@ -63,6 +58,7 @@ def test_login_with_wrong_password(client):
     assert data["message"] == "Invalid password"
     
 def test_logout_succesfully(client):
+    """Tests that the /auth/logout endpoint works correctly, invalidating the session."""
     response = client.post(
         "/auth/register", 
         json=valid_user

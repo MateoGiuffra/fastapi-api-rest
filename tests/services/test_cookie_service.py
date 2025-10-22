@@ -10,16 +10,16 @@ from src.core.config import settings
 
 @pytest.fixture
 def cookie_service():
-    """Fixture para obtener una instancia de CookieService."""
+    """Fixture to get an instance of CookieService."""
     return CookieService()
 
 @pytest.fixture
 def sample_user():
-    """Fixture para crear un usuario de ejemplo."""
+    """Fixture to create a sample user."""
     return User(id="a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6", username="testuser", password="testpassword")
 
 def test_create_token(cookie_service: CookieService, sample_user: User):
-    """Prueba que el token JWT se crea correctamente."""
+    """Tests that the JWT token is created correctly."""
     token = cookie_service.create_token(sample_user)
     
     assert isinstance(token, str)
@@ -35,7 +35,7 @@ def test_create_token(cookie_service: CookieService, sample_user: User):
     assert abs((expected_exp - exp_time).total_seconds()) < 5 # Tolerancia de 5 segundos
 
 def test_set_cookie(cookie_service: CookieService, sample_user: User):
-    """Prueba que la cookie se establece correctamente en la respuesta."""
+    """Tests that the cookie is set correctly in the response."""
     mock_response = MagicMock(spec=Response)
     
     cookie_service.set_cookie(mock_response, sample_user)
@@ -54,7 +54,7 @@ def test_set_cookie(cookie_service: CookieService, sample_user: User):
     assert payload["id"] == sample_user.id
 
 def test_clean_cookies(cookie_service: CookieService):
-    """Prueba que la cookie se elimina correctamente."""
+    """Tests that the cookie is deleted correctly."""
     mock_response = MagicMock(spec=Response)
     
     cookie_service.clean_cookies(mock_response)
@@ -62,7 +62,7 @@ def test_clean_cookies(cookie_service: CookieService):
     mock_response.delete_cookie.assert_called_once_with(key="token", path="/")
 
 def test_get_user_id_from_token_valid(cookie_service: CookieService, sample_user: User):
-    """Prueba que se obtiene el ID de usuario desde un token válido en la request."""
+    """Tests that the user ID is obtained from a valid token in the request."""
     token = cookie_service.create_token(sample_user)
     mock_request = MagicMock(spec=Request)
     mock_request.cookies.get.return_value = token
@@ -72,7 +72,7 @@ def test_get_user_id_from_token_valid(cookie_service: CookieService, sample_user
     assert user_id == sample_user.id
 
 def test_get_user_id_from_token_invalid(cookie_service: CookieService):
-    """Prueba que devuelve None si el token es inválido."""
+    """Tests that it returns None if the token is invalid."""
     mock_request = MagicMock(spec=Request)
     mock_request.cookies.get.return_value = "invalid.token.string"
     
@@ -81,7 +81,7 @@ def test_get_user_id_from_token_invalid(cookie_service: CookieService):
     assert user_id is None
 
 def test_get_user_id_from_token_expired(cookie_service: CookieService, sample_user: User):
-    """Prueba que devuelve None si el token ha expirado."""
+    """Tests that it returns None if the token has expired."""
     # Creamos un token que expiró en el pasado
     cookie_service.expiration_time = -1 
     expired_token = cookie_service.create_token(sample_user)
@@ -94,11 +94,11 @@ def test_get_user_id_from_token_expired(cookie_service: CookieService, sample_us
     assert user_id is None
 
 def test_validate_token_invalid(cookie_service: CookieService):
-    """Prueba que validate_token lanza una excepción para un token inválido."""
+    """Tests that validate_token raises an exception for an invalid token."""
     with pytest.raises(JWTError):
         cookie_service.validate_token("invalid.token")
 
 def test_validate_token_none(cookie_service: CookieService):
-    """Prueba que validate_token lanza una excepción para un token nulo."""
+    """Tests that validate_token raises an exception for a null token."""
     with pytest.raises(JWTError):
         cookie_service.validate_token(None)

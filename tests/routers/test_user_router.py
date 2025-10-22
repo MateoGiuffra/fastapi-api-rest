@@ -2,6 +2,7 @@ from tests.routers.users_constants import *
 import pytest
 
 def test_get_me_succesfully(client):
+    """Tests that the /users/me endpoint successfully retrieves the authenticated user's data."""
     response = client.post(
         "/auth/register",  
         json=valid_user
@@ -18,6 +19,7 @@ def test_get_me_succesfully(client):
     assert data["username"] == name_valid_user
 
 def test_get_me_unauthorized(client):
+    """Tests that accessing the /users/me endpoint without authentication returns a 401 Unauthorized error."""
     response = client.get(
         "/users/me"
     )
@@ -28,13 +30,13 @@ def test_get_me_unauthorized(client):
 # --- Tests for GET /users (paginated results) ---
 
 def test_list_users_unauthorized(client):
-    """Prueba que listar usuarios sin autenticación devuelve 401."""
+    """Tests that listing users without authentication returns a 401 Unauthorized error."""
     response = client.get("/users")
     assert response.status_code == 401
     assert "Unauthorized" in response.json()["message"]
 
 def test_list_users_empty_db(client, user_service_test_instance):
-    """Prueba que listar usuarios con la BD vacía devuelve una lista vacía."""
+    """Tests that listing users with an empty database returns an empty list."""
     client.post("/auth/register", json=valid_user)
     user_service_test_instance.delete_all()
     
@@ -48,7 +50,7 @@ def test_list_users_empty_db(client, user_service_test_instance):
     assert data["limit"] == 10
 
 def test_list_users_with_default_pagination(client):
-    """Prueba la paginación por defecto."""
+    """Tests the default pagination behavior for the user list endpoint."""
     # Creamos un usuario para poder autenticarnos
     client.post("/auth/register", json=valid_user)
 
@@ -73,7 +75,7 @@ def test_list_users_with_default_pagination(client):
     (1, -1),  # limit no puede ser negativo
 ])
 def test_list_users_with_invalid_pagination_params(client, page, limit):
-    """Prueba que parámetros de paginación inválidos devuelven un error 422."""
+    """Tests that invalid pagination parameters return a 422 Unprocessable Entity error."""
     client.post("/auth/register", json=valid_user)
     
     response = client.get(f"/users?page={page}&limit={limit}")
@@ -81,7 +83,7 @@ def test_list_users_with_invalid_pagination_params(client, page, limit):
     assert response.status_code == 422 # Unprocessable Entity
 
 def test_list_users_requesting_page_out_of_bounds(client):
-    """Prueba que pedir una página que no existe devuelve una lista vacía."""
+    """Tests that requesting a page that is out of bounds returns an empty list."""
     client.post("/auth/register", json=valid_user)
     
     response = client.get("/users?page=100") # Solo hay 1 usuario
@@ -95,7 +97,7 @@ def test_list_users_requesting_page_out_of_bounds(client):
 # --- Tests for GET /users/{id} ---
 
 def test_get_user_by_id_successfully(client):
-    """Prueba que se puede obtener un usuario por su ID."""
+    """Tests that a user can be successfully retrieved by their ID."""
     reg_response = client.post("/auth/register", json=valid_user)
     user_id = reg_response.json()["id"]
 
@@ -107,7 +109,7 @@ def test_get_user_by_id_successfully(client):
     assert data["username"] == valid_user["username"]
 
 def test_get_user_by_id_not_found(client):
-    """Prueba que obtener un usuario con un ID inexistente devuelve 404."""
+    """Tests that attempting to retrieve a user with a non-existent ID returns a 404 Not Found error."""
     client.post("/auth/register", json=valid_user)
     
     non_existent_id = "12345678-1234-5678-1234-567812345678"

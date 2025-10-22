@@ -12,6 +12,9 @@ class Middleware(BaseHTTPMiddleware):
         self.public_paths = public_paths
     
     async def dispatch(self, request: Request, call_next: callable):
+        if request.url.path in self.public_paths:
+            return await call_next(request)
+        
         try:
             token = self.cookie_service.get_token(request)
             self.cookie_service.validate_token(token)

@@ -55,3 +55,62 @@ def client():
     connection.close() 
 
     app.dependency_overrides.clear()
+    
+# conftest.py
+
+# ... Tu código de 'client' ...
+
+# -------------------------------------------------------------
+# 2. FIXTURE DE SERVICIO (USANDO LA SESIÓN DE PRUEBA)
+# -------------------------------------------------------------
+
+# Importamos las funciones de inyección necesarias
+from src.dependencies.repositories_di import get_user_repository
+from src.dependencies.services_di import get_user_service, get_cookie_service 
+
+@pytest.fixture(scope="function")
+def user_service_test_instance(client):
+    """
+    Fixture que provee una instancia de UserService inyectada con la 
+    sesión de prueba activa. Las operaciones son reversibles.
+    """
+    
+    # 1. ACCESO A LA SESIÓN DE PRUEBA: 
+    # Cuando se sobrescriben dependencias, podemos obtener el objeto 
+    # que FastAPI está usando para la sesión de prueba.
+    # Accedemos a la función override y la ejecutamos para obtener la sesión:
+    override_func = app.dependency_overrides.get(app_get_db_session)
+    
+    if not override_func:
+        raise Exception("La dependencia de DB no fue sobrescrita en el fixture 'client'.")
+        
+    # El override_get_db devuelve un generador, debemos extraer el objeto
+    db_generator = override_func()
+    db = next(db_generator) # Obtenemos la sesión activa de la transacción
+
+    # 2. CONSTRUCCIÓN MANUAL DEL SERVICIO:
+    
+    # A. Repository: Le pasamos la sesión de prueba
+    user_repo = get_user_repository(db=db) 
+
+    # B. CookieService: (Asumimos que no requiere dependencias)
+    cookie_service = get_cookie_service()
+    
+    # C. UserService: Le pasamos sus dependencias resueltas
+    service = get_user_service(
+        user_repository=user_repo, 
+        cookie_service=cookie_service
+    )
+    
+    # 3. Yield: Proveemos el servicio al test
+    yield service
+    
+    # 4. Cleanup: El cleanup (rollback/close) ocurre en el fixture 'client', 
+    # pero debemos asegurarnos de consumir el generador de DB si es necesario.
+    try:
+        next(db_generator) 
+    except StopIteration:
+        pass # El generador está bien si ya se detuvo
+
+# NOTA: Asegúrate de tener 'from src.dependencies.repositories_di import get_user_repository'
+# y 'from src.dependencies.services_di import get_user_service, get_cookie_service' en tu conftest.py

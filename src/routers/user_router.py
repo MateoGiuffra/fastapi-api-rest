@@ -22,14 +22,14 @@ async def get_current_user(request: Request, user_service: UserService = UserSer
     return UserDTO.model_validate(user)
 
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserDTO)
-async def get_current_user(id:str, user_service: UserService = UserServiceDep) -> UserDTO:
+async def get_user_by_id(id:str, user_service: UserService = UserServiceDep) -> UserDTO:
     user = user_service.get_user_by_id(id)
     return UserDTO.model_validate(user)
 
-@router.get("", status_code=status.HTTP_200_OK, response_model=PaginationResponse, response_model_exclude_none=True)
+@router.get("", status_code=status.HTTP_200_OK, response_model=PaginationResponse)
 async def list_users(user_service: UserService = UserServiceDep, params: PaginationParams = Depends(get_pagination_params)) -> list[UserDTO]:
     page: PaginationResponse = user_service.list_users(params)
-    page.list = [UserDTO.model_validate(user) for user in page.list]
+    page.results = [UserDTO.model_validate(user) for user in page.results]
     return page.model_dump()
 
 

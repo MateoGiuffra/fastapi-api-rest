@@ -1,4 +1,5 @@
 import sys
+import os
 from os.path import abspath, dirname
 from logging.config import fileConfig
 
@@ -18,6 +19,11 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+# --- INICIO DE CAMBIOS PARA PRODUCCIÓN ---
+# Lee la URL de la base de datos desde una variable de entorno si está disponible.
+database_url = os.getenv('DATABASE_URL', config.get_main_option("sqlalchemy.url"))
+config.set_main_option('sqlalchemy.url', database_url)
 
 # --- INICIO DE CAMBIOS ---
 # Importa la Base de tus modelos y los propios modelos

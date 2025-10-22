@@ -38,7 +38,7 @@ class CookieService:
         )
     
     def get_user_id_from_token(self, request: Response) -> str:
-        token = request.cookies.get("token")
+        token = self.get_token(request)
         if not token:
             return None
         try:

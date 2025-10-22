@@ -19,8 +19,7 @@ class Middleware(BaseHTTPMiddleware):
 
         try:
             self.cookie_service.validate_token(token)
-            response = await call_next(request)
-            return response
+            return await call_next(request)
         except JWTError:
             return JSONResponse(
                 status_code=401,
@@ -33,7 +32,7 @@ class Middleware(BaseHTTPMiddleware):
         except Exception as e:
             print("Exception middleware: ", e, "type: ", type(e))
             return JSONResponse(
-                status_code=401,
+                status_code=500,
                 content=ErrorDTO(
                     status_code=500,
                     message="Something went wrong. Try again later.",

@@ -53,14 +53,14 @@ class UserService:
     def list_users(self, params: PaginationParams) -> PaginationResponse:
         limit = params.limit
         users = self.user_repository.get_users(params.offset, limit)
-        total_entities = self.user_repository.get_count()
-        total_pages = total_entities // limit + 1 if total_entities % limit != 0 else total_entities
+        total_results = self.user_repository.get_count()
+        total_pages = total_results // limit + 1 if total_results % limit != 0 else total_results
         return PaginationResponse(
-            list=users,
+            results=users,
             page=params.page,
             limit=params.limit,
             total_pages=total_pages,
-            total_entities=total_entities
+            total_results=total_results
         )
     
         

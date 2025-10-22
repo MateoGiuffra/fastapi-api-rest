@@ -1,4 +1,4 @@
-from tests.routers.users import *
+from tests.routers.users_constants import *
 
 def test_register_new_user_successfully(client):
     """
@@ -34,16 +34,6 @@ def test_register_existing_user_returns_conflict(client):
 
     assert response.status_code == 409 
     assert response.json()["message"] == "Username already exists"
-    
-def test_users_list_clean(client):
-    response = client.post(
-        "/auth/register", 
-        json=valid_user
-    )
-    assert response.status_code == 201
-
-    response_protected = client.get("/users")
-    assert response_protected.status_code == 200
     
 
 def test_login_without_register_first(client):

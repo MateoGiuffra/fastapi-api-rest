@@ -50,7 +50,7 @@ class CookieService:
             return payload.get("id")
         except jwt.ExpiredSignatureError:
             return None
-        except jwt.InvalidTokenError:
+        except JWTError:
             return None
     
     def get_token(self, request: Response) -> str:

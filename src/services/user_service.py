@@ -26,7 +26,7 @@ class UserService:
 
     def login(self, login_user_dto: LoginUserDTO, response: Response) -> User: 
         user = self.user_repository.get_by_username(login_user_dto.username)
-        if not user:
+        if not user or user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         is_valid_password = bcrypt.checkpw(login_user_dto.password.encode('utf-8'), user.password.encode('utf-8'))
         if not is_valid_password:
@@ -54,7 +54,7 @@ class UserService:
         limit = params.limit
         users = self.user_repository.get_users(params.offset, limit)
         total_results = self.user_repository.get_count()
-        total_pages = total_results // limit + 1 if total_results % limit != 0 else total_results
+        total_pages = (total_results + limit - 1) // limit if total_results > 0 else 0
         return PaginationResponse(
             results=users,
             page=params.page,

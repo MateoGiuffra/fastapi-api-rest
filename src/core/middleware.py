@@ -1,23 +1,19 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from src.services.cookie_service import CookieService
-from src.core.config import PUBLIC_ENDPOINTS
 from fastapi.responses import JSONResponse
 from src.schemas.error import ErrorDTO
 from fastapi import Request
 from jose import JWTError
 
 class Middleware(BaseHTTPMiddleware):
-    def __init__(self, app, dispatch = None):
+    def __init__(self, app, public_paths: set, dispatch = None):
         super().__init__(app, dispatch)
         self.cookie_service = CookieService()
+        self.public_paths = public_paths
     
     async def dispatch(self, request: Request, call_next: callable):
-        if request.url.path in PUBLIC_ENDPOINTS:
-            return await call_next(request)
-        
-        token = self.cookie_service.get_token(request)
-
         try:
+            token = self.cookie_service.get_token(request)
             self.cookie_service.validate_token(token)
             return await call_next(request)
         except JWTError:

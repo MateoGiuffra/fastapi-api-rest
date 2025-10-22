@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from src.routers import routers
+from fastapi.routing import APIRoute
 from src.handlers import exception_handlers
 from src.core.middleware import Middleware as CustomMiddleware
-from src.core.config import register_public_endpoint
+from src.core.config import settings
 
 app = FastAPI(
     description="API REST",
@@ -10,8 +11,16 @@ app = FastAPI(
     exception_handlers=exception_handlers
 )
 
-app.add_middleware(CustomMiddleware)
-for router in routers:
-    app.include_router(router)
+def set_up():
+    public_paths = set(settings.DEFAULT_PUBLIC_PATHS)
+    for router in routers:
+        app.include_router(router)
+    for route in app.routes:
+        if isinstance(route, APIRoute):
+            if getattr(route.endpoint, "_is_public", False):
+                public_paths.add(route.path)
+    
+    app.add_middleware(CustomMiddleware, public_paths=public_paths)
 
-register_public_endpoint(app)
+
+set_up()

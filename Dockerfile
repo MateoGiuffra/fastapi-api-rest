@@ -41,4 +41,4 @@ COPY alembic.ini .
 # Command to run the application
 # The web server will bind to 0.0.0.0 to be accessible from outside the container.
 # Render provides the PORT environment variable.
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT

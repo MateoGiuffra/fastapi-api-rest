@@ -4,15 +4,14 @@ from typing import List
 
 class PaginationParams(BaseModel):
     page: int = Field(default=1, ge=1)
-    limit: int = Field(default=10, ge=1, le=100)  # ← 10 por defecto
-
+    limit: int = Field(default=10, ge=1, le=100)  
     @property
     def offset(self) -> int:
         return (self.page - 1) * self.limit
 
 def get_pagination_params(
     page: int = Query(1, ge=1, description="Page number"),
-    limit: int = Query(10, ge=1, le=100, description="Elements per page"),  # ← 10 por defecto
+    limit: int = Query(10, ge=1, le=100, description="Elements per page"), 
 ) -> PaginationParams:
     return PaginationParams(page=page, limit=limit)
 

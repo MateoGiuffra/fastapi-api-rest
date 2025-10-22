@@ -41,15 +41,5 @@ class HandlerException:
             content=ErrorDTO(status_code=exc.status_code, message=exc.detail).model_dump(),
         )
         
-    # async def business_exception_handler(self, request: Request, exc: BusinessException):
-    #     """
-    #     Manejador para nuestras excepciones de negocio personalizadas (BusinessException).
-    #     Devuelve una respuesta JSON estandarizada usando ErrorDTO.
-    #     """
-    #     return JSONResponse(
-    #         status_code=exc.status_code,
-    #         content=ErrorDTO(status_code=exc.status_code, message=exc.message).model_dump(),
-    #     )
-
 
 

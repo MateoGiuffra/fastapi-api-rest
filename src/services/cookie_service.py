@@ -18,7 +18,7 @@ class CookieService:
             key="token",
             value=token,
             httponly=True,
-            samesite="lax", # 'strict' o 'lax' para protección CSRF
+            samesite="lax", # 'strict' or 'lax' to CSRF protection
             secure=self.secure 
         )
     def clean_cookies(self, response: Response):

@@ -5,7 +5,7 @@ from src.schemas.error import ErrorDTO
 from fastapi import Request
 from jose import JWTError
 
-class Middleware(BaseHTTPMiddleware):
+class JWTCookieAuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, public_paths: set, dispatch = None):
         super().__init__(app, dispatch)
         self.cookie_service = CookieService()

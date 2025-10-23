@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from src.routers import routers
 from fastapi.routing import APIRoute
 from src.handlers import exception_handlers
-from src.core.middleware import Middleware as CustomMiddleware
+from src.core.middleware import JWTCookieAuthMiddleware
 from src.core.config import settings
 
 app = FastAPI(
@@ -20,7 +20,7 @@ def set_up():
             if getattr(route.endpoint, "_is_public", False):
                 public_paths.add(route.path)
     
-    app.add_middleware(CustomMiddleware, public_paths=public_paths)
+    app.add_middleware(JWTCookieAuthMiddleware, public_paths=public_paths)
 
 
 set_up()

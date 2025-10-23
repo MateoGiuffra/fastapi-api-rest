@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from fastapi import HTTPException, status, Response, Request
 from src.database.models.user import User
-from src.repositories.user_repository import UserRepository
+from src.repositories.impl.user_repository_sql_alchemy import UserRepository
 from src.services.cookie_service import CookieService
 from src.services.user_service import UserService
 from src.schemas.user import RegisterUserDTO, LoginUserDTO

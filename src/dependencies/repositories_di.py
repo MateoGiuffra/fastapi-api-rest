@@ -1,5 +1,5 @@
 from src.database.session import get_db_session
-from src.repositories.user_repository import *
+from src.repositories.impl.user_repository_sql_alchemy import *
 from sqlalchemy.orm import Session
 from fastapi import Depends
 

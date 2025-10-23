@@ -1,5 +1,5 @@
 from fastapi import Depends
-from src.repositories.user_repository import UserRepository
+from src.repositories.impl.user_repository_sql_alchemy import UserRepository
 from src.services.user_service import UserService
 from src.dependencies.repositories_di import get_user_repository
 from src.services.cookie_service import CookieService

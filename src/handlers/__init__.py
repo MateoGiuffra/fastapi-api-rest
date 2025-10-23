@@ -1,7 +1,7 @@
 import inspect
-from src.handlers.exception_handlers import HandlerException
+from src.handlers.exception_handler import ExceptionHandler
 
-instance_object = HandlerException()
+instance_object = ExceptionHandler()
 
 def get_json():
     exception_handlers = {}
